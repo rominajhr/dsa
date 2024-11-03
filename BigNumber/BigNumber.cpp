@@ -7,72 +7,68 @@ using namespace std;
 BigNumber :: BigNumber (){
     size = 1;
     sign = false;
-    digits[499] = 0;
+    num = '\0';
 }
 
 BigNumber :: BigNumber(string str){
     size = str.length();
     
     if(str[0] == '-'){
+        num = str[1];
         sign = true;
+        for(int i = 2;i < size;i++)
+            num += str[i];
         size--;
-        for(int i = size;i > 0;i--)
-            digits[500 - i] = str[size - i + 1] - '0';
     }
     else{
         sign = false;
-        for(int i = size;i > 0;i--)
-            digits[500 - i] = str[size - i] - '0';
+        num = str;
     }
 }
 
-BigNumber :: BigNumber(int num){
+BigNumber :: BigNumber(int number){
     int i = 1;
     size = 0;
-    if(num > 0)
+    string s;
+    num = '\0';
+    if(number > 0)
         sign = false;
     else{
         sign = true;
-        num *= -1;
+        number *= -1;
     }
-    while(num){
+    while(number){
         size++;
-        digits[500 - i] = num % 10;
-        num /= 10;
+        s = number % 10 + '0';
+        s += num;
+        num = s;
+        number /= 10;
         i++;
     }
 }
 
 
 void BigNumber :: shiftR(){
+    num[size - 1] = '\0';
     size--;
-    for(int i = 1 ; i <= size ;i++)
-        digits[500 - i] = digits[500 - i - 1];
-
 }
 
 void BigNumber :: shiftR(int n){
-    size -= n;
-    for(int i = 1;i <= size;i++)
-        digits[500 - i] = digits[500 - i - n];
+    for(int i = 1;i <= n;i++)
+        num[size - i] = '\0';
 
+    size -= n;
 }
 
 void BigNumber :: shiftL(){
-    for(int i = size;i > 0;i--)
-        digits[500 - i - 1] = digits[500 - i];
-
-    digits[499] = 0;
     size++;
+    num += '0';
 }
 
 void BigNumber :: shiftL(int n){
-    for(int i = size;i > 0 ;i--)
-        digits[500 - i - n] = digits[500 - i];
-
-    for(int i = 1;i <= n;i++)
-        digits[500 - i] = 0;
     size += n;
+    for(int i = 0;i < n;i++)
+        num += '0';
 }
 
 
@@ -85,21 +81,27 @@ BigNumber BigNumber :: sum(BigNumber r){
     BigNumber result;
     result.sign = sign;
     int carry = 0 , n = max(size , r.size) , k;
-    for(int i = 1;i <= n;i++){
-        if(i > size)
-            k = r.digits[500 - i] + carry;
-        else if(i > r.size)
-            k = digits[500 - i] + carry;
-        else
-            k = digits[500 - i] + r.digits[500 - i] + carry;
-        
-        result.digits[500 - i] = k % 10;
-        carry = k / 10;
-    }
-    result.size = n;
+    string s;
 
+    for(int i = 1;i <= n;i++){
+            k = carry;
+            if(size - i >= 0)
+                k += num[size - i] - '0';
+            if(r.size - i >= 0)
+                k += r.num[r.size - i] - '0';
+
+            s = k % 10 + '0';
+            s += result.num;
+            result.num = s;
+            carry = k / 10;
+     
+    }
+
+    result.size = n;
     if(carry){
-        result.digits[500 - n - 1] = carry;
+        s = carry + '0';
+        s += result.num;
+        result.num = s;
         result.size++;
     }
 
@@ -117,73 +119,101 @@ BigNumber BigNumber :: minus(BigNumber r){
     //asigning the sign of the rsult number
     if(size > r.size)
         result.sign = sign;
-    else if(r.sign > sign)
+    else if(r.size > size)
         result.sign = !sign;
     else{
-        if(digits[500 - size] > r.digits[500 - size])
+        if(num[0] > r.num[0])
             result.sign = sign;
         else
             result.sign = !sign;
     }
 
     bool endOfNum = false;
+    int k;
+    string s;
     if(result.sign == sign){
         for(int i = 1;i <= size;i++){
-            if(i > r.size)
-                r.digits[500 - i] = 0;
-            if(digits[500 - i] >= r.digits[500 - i])
-                result.digits[500 - i] = digits[500 - i] - r.digits[500 - i];
+            if(r.size - i < 0)
+                k = num[size - i] - '0';
             else{
-                for(int j = i + 1;j <= size;j++){
-                    if(digits[500 - j]){
-                        digits[500 - j]--;
-                        break;
-                    }
-                    digits[500 - j] = 9;
-                }
+                if((num[size - i] - '0') >= (r.num[r.size - i] - '0'))
+                    k = (num[size - i] - '0') - (r.num[r.size - i] - '0');
+                else{
+                    for(int j = i + 1;j <= size;j++){
+                        if(num[size - j] - '0'){
+                            num[size - j]--;
+                            break;
+                        }
 
-                digits[500 - i] += 10;
-                result.digits[500 - i] = digits[500 - i] - r.digits[500 - i];
+                        num[size - j] = 9 + '0';
+                    }
+                    k = 10 + (num[size - i] - '0') - (r.num[r.size - i] - '0');
+                }
             }
 
-            if(result.digits[500 - i])
+            if(k)
                 endOfNum = true;
             else
                 endOfNum = false;
-            
+
             if(endOfNum)
                 result.size = i;
+
+            
+            s = k + '0'; 
+            s += result.num;
+            result.num = s;
         }
     }
     else{
         for(int i = 1;i <= r.size;i++){
-            if(i > size)
-                digits[500 - i] = 0;
-            if(digits[500 - i] <= r.digits[500 - i])
-                result.digits[500 - i] = r.digits[500 - i] - digits[500 - i];
-            else{
-                for(int j = i + 1;j <= r.size;j++){
-                    if(r.digits[500 - j]){
-                        r.digits[500 - j]--;
-                        break;
-                    }
-                    r.digits[500 - j] = 9;
-                }
 
-                r.digits[500 - i] += 10;
-                result.digits[500 - i] = r.digits[500 - i] - digits[500 - i];
+            if(size - i < 0)
+                k = r.num[r.size - i] - '0';
+            else{
+                if((r.num[r.size - i] - '0') >= (num[size - i] - '0'))
+                    k = (r.num[r.size - i] - '0') - (num[size - i] - '0');
+                else{
+                    for(int j = i + 1;j <= r.size;j++){
+                        if(r.num[r.size - j] - '0'){
+                            r.num[r.size - j]--;
+                            break;
+                        }
+
+                        r.num[r.size - j] = 9 + '0';
+                    }
+
+                    k = (10 + r.num[r.size - i] - '0') - (num[size - i] - '0');
+                }
             }
 
-            if(result.digits[500 - i])
+            if(k)
                 endOfNum = true;
             else
                 endOfNum = false;
-            
+
             if(endOfNum)
                 result.size = i;
+
+            
+            s = k + '0'; 
+            s += result.num;
+            result.num = s;
         }
     }
 
+
+    int zeros = 0;
+    for(int i = 0;result.num[i] == '0' && i <= result.size;i++)
+        zeros++;
+
+    for(int i = 0;i < result.size - zeros + 1;i++)
+        result.num[i] = result.num[i + zeros];
+
+    for(int i = 0;i < zeros;i++)
+        result.num[result.size - i] = '\0';
+
+    result.size -= zeros;
 
 
     return result;
@@ -193,9 +223,8 @@ BigNumber BigNumber :: minus(BigNumber r){
 ostream & operator << (ostream & strm, const BigNumber &b){
     if(b.sign)
         cout<<'-';
-    
-    for(int i = b.size;i > 0;i--)
-        strm<<b.digits[500 - i];
+
+    strm<<b.num;
 
     return strm;
 }
