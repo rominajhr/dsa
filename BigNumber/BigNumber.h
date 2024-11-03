@@ -9,7 +9,7 @@ using namespace std;
 class BigNumber{
     int size;
     bool sign;
-    int digits[500];
+    string num;
 
     public:
         BigNumber();
