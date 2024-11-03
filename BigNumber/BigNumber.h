@@ -8,6 +8,7 @@ using namespace std;
 
 class BigNumber{
     int size;
+    bool sign;
     int digits[500];
 
     public:
@@ -22,6 +23,8 @@ class BigNumber{
 
         BigNumber sum(BigNumber);
         BigNumber minus(BigNumber);
+
+        friend ostream & operator << (ostream & , const BigNumber &);
 };
 
 #endif
