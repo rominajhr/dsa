@@ -7,7 +7,7 @@ using namespace std;
 BigNumber :: BigNumber (){
     size = 0;
     sign = false;
-    num = '\0';
+    num = "\0";
 }
 
 BigNumber :: BigNumber(string str){
@@ -30,7 +30,7 @@ BigNumber :: BigNumber(int number){
     int i = 1;
     size = 0;
     string s;
-    num = '\0';
+    num = "\0";
     if(number > 0)
         sign = false;
     else{
@@ -86,8 +86,10 @@ BigNumber BigNumber :: sum(BigNumber r){
 
     for(int i = 1;i <= n;i++){
             k = carry;
+
             if(size - i >= 0)
                 k += num[size - i] - '0';
+            
             if(r.size - i >= 0)
                 k += r.num[r.size - i] - '0';
 
@@ -320,48 +322,67 @@ BigNumber BigNumber :: karatsuba(BigNumber r){
     BigNumber result , tempb1_1 , tempb1_2 , tempb2_1 , tempb2_2 , k1 , k2 , k3;
     int n = max(size , r.size);
     if(n <= 1){
-        int number = (num[0] - '0') * (r.num[0] - '0');
-        return number;
+        int number1 = 0, number2 = 0;
+        if(num[0] >= '0' && num[0] <= '9')
+            number1 = num[0] - '0';
+        if(r.num[0] >= '0' && r.num[0] <= '9')
+            number2 = r.num[0] - '0';
+        return number1 * number2;
     }
 
+    string s;
     for(int i = 1;i <= n/2;i++){
-        if(i < size){
-            tempb1_1.num += num[size - i];
+        if(i <= size){
+            s = num[size - i];
+            s += tempb1_1.num;
+            tempb1_1.num = s;
             tempb1_1.size++;
         }
-        if(i < r.size){
-            tempb2_1.num += r.num[r.size - i];
+        if(i <= r.size){
+            s = r.num[r.size - i];
+            s += tempb2_1.num;
+            tempb2_1.num = s;            
             tempb2_1.size++;
         }
     }
 
     for(int i = n / 2 + 1;i <= n;i++){
-        if(i < size){
-            tempb1_2.num += num[size - i];
+        if(i <= size){
+            s = num[size - i];
+            s += tempb1_2.num;
+            tempb1_2.num = s;
             tempb1_2.size++;
         }
-        if(i < r.size){
-            tempb2_2.num += r.num[r.size - i];
+        if(i <= r.size){            
+            s = r.num[r.size - i];
+            s += tempb2_2.num;
+            tempb2_2.num = s;
             tempb2_2.size++;
         }
     }
-
-    cout<<tempb1_1<<" "<<tempb1_2<<" "<<tempb2_1<<" "<<tempb2_2<<endl;
     
     k1 = tempb1_1.karatsuba(tempb2_1);
     k2 = tempb1_2.karatsuba(tempb2_2);
-    k3 = tempb2_2.sum(tempb1_2).karatsuba(tempb1_1.sum(tempb2_1));
-
-    string s = "1";
+    k3 = tempb1_1.sum(tempb1_2).karatsuba(tempb2_1.sum(tempb2_2));
+    k3 = k3.minus(k1);
+    k3 = k3.minus(k2);
+    s = "1";
     for(int i = 1;i <= n/2;i++)
         s += '0';
     
     result = result.sum(k1);
     result = result.sum(k3.multiply(s));
 
-    for(int i = n/2 + 1;i <= n;i++)
-        s += '0';
 
+    int i;
+    if(n % 2)
+        i = n/2 + 2;
+    else
+        i = n / 2 + 1;
+
+    for(;i <= n;i++)
+        s += '0';
+    
     result = result.sum(k2.multiply(s));
 
     return result;
