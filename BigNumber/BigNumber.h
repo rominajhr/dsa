@@ -23,8 +23,14 @@ class BigNumber{
 
         BigNumber sum(BigNumber);
         BigNumber minus(BigNumber);
+        BigNumber multiply(BigNumber);
+        BigNumber division(BigNumber);
+        BigNumber factorial();
+        BigNumber power(int);
+        BigNumber karatsuba(BigNumber);
 
         friend ostream & operator << (ostream & , const BigNumber &);
+        friend bool operator <= (const BigNumber & , const BigNumber &);
 };
 
 #endif
