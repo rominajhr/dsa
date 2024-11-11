@@ -330,6 +330,15 @@ BigNumber BigNumber :: karatsuba(BigNumber r){
         return number1 * number2;
     }
 
+    bool isSignEqual;
+    if(r.sign != sign){
+        isSignEqual = false;
+        r.sign = sign = false;
+    }
+    else
+        isSignEqual = true;
+
+    
     string s;
     for(int i = 1;i <= n/2;i++){
         if(i <= size){
@@ -384,6 +393,9 @@ BigNumber BigNumber :: karatsuba(BigNumber r){
         s += '0';
     
     result = result.sum(k2.multiply(s));
+
+    if(!isSignEqual)
+        result.sign = true;
 
     return result;
 
