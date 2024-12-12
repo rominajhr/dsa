@@ -7,7 +7,9 @@ struct node{
 };
 
 void newNode(node * &, int);
-int findMax(node *);
+node * findMax(node *);
+void deleteMax(node * &);
+void printNode(node *);
 
 int main(){
     node * HEAD = NULL;
@@ -19,7 +21,8 @@ int main(){
         cin>>n;
     }
 
-    cout<<"MAX = "<<findMax(HEAD)<<endl;
+    deleteMax(HEAD);
+    printNode(HEAD);
 }
 
 void newNode(node * &head , int n){
@@ -29,15 +32,33 @@ void newNode(node * &head , int n){
     head = temp;
 }
 
-int findMax(node * head){
+node * findMax(node * head){
+    node * temp = NULL;
     int maximum = head->num;
-    head = head->nxt;
-    while(head){
-        if(head->num > maximum)
-            maximum = head->num;
+    while(head->nxt){
+        if(head->nxt->num > maximum){
+            temp = head;
+            maximum = head->nxt->num;
+        }
 
         head = head->nxt;
     }
 
-    return maximum;
+    return temp;
+}
+
+void deleteMax(node *& head){
+    node * temp = findMax(head);
+    if(temp == NULL)
+        head = head->nxt;
+    else
+        temp->nxt = temp->nxt->nxt;
+}
+
+void printNode(node * head){
+    while(head){
+        cout<<head->num<<" ";
+        head = head->nxt;
+    }
+    cout<<endl;
 }
