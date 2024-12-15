@@ -6,16 +6,21 @@
 #include <stack>
 using namespace  std;
 
+
 struct NumOrOpr{
     float num;
     char opr;
 };
 
+
+//prototypes//
 void postfix(string);
 string changeToPostfix(string);
 float solvePostfix(string , float);
 void prefix(string);
 void variable(string);
+/////////////
+
 
 bool isNumber(char c){
     if(c <= '9' && c >= '0')
@@ -79,13 +84,9 @@ int main() {
         prefix(str);
 
     }
-    else{
+    else {
         variable(str);
     }
-
-    //plot//
-
-
 }
 
 string changeToPostfix(string s){
@@ -95,11 +96,28 @@ string changeToPostfix(string s){
     bool isParentheses = false;
 
     for(int i = 0;i < length;i++){
-        if(isNumber(s[i]))
+        if(isNumber(s[i])) {
+            bool oneDigit = true;
+            while(i + 1 < length && isNumber(s[i + 1])){
+                if(oneDigit) {
+                    result += "(";
+                    oneDigit = false;
+                }
+                result += s[i];
+                i++;
+            }
             result += s[i];
+            if(!oneDigit)
+                result += ")";
+
+            if(!st.empty() && st.top() == '~') {
+                result += '~';
+                st.pop();
+            }
+        }
         else{
             if(s[i] == '-' && (i == 0 || !isNumber(s[i - 1]) && s[i - 1] != ')'))
-                result += "~";
+                st.push('~');
             else {
                 if(s[i] == ')')
                     isParentheses = true;
@@ -131,58 +149,48 @@ string changeToPostfix(string s){
     return result;
 }
 
-float solvePostfix(string result , float f){
-    int length = result.length();
-    NumOrOpr value;
-    stack<NumOrOpr> sta;
-    float solution , fl;
+float solvePostfix(string post , float f){
+    int length = post.length();
+    stack<float> sta;
+    float solution , fl , value;
     for(int i = 0;i < length;i++){
-        if(isNumber(result[i])) {
-            if(result[i] == 'x')
-                value.num = f;
+        if(isNumber(post[i]) || post[i] == '(') {
+            if(post[i] == 'x')
+                value = f;
+            else if(post[i] == '('){
+                i++;
+                value = 0;
+                while(post[i] != ')'){
+                    value *= 10;
+                    value += post[i] - '0';
+                    i++;
+                }
+            }
             else
-                value.num = result[i] - '0';
-            value.opr = '\0';
-        }
-        else{
-            value.opr = result[i];
-            value.num = 0;
-        }
-
-        if(sta.empty()) {
-            sta.push(value);
-        }
-        else if(sta.top().opr == '~'){
-            value.num *= -1;
-            sta.pop();
-            sta.push(value);
-        }
-        else if(value.opr == '\0') {
+                value = post[i] - '0';
 
             sta.push(value);
         }
         else{
-            fl = sta.top().num;
-            sta.pop();
-            solution = solve(value.opr, sta.top().num, fl);
-            sta.pop();
-            value.num = solution;
-            value.opr = '\0';
-            sta.push(value);
+            if(post[i] == '~')
+                sta.top() *= -1;
+            else{
+                fl = sta.top();
+                sta.pop();
+                solution = solve(post[i] , sta.top() , fl);
+                sta.pop();
+                sta.push(solution);
+            }
         }
-
     }
 
-    return sta.top().num ;
+    return sta.top() ;
 
 }
 
 void postfix(string s){
-
     string post = changeToPostfix(s);
     cout<<"\npostfix : "<<post<< " = " << solvePostfix(post , 0);
-
-
 }
 
 
@@ -195,15 +203,24 @@ void prefix(string s){
 
     for(int i = length - 1;i >= 0;i--){
         if(isNumber(s[i])) {
-            temp = s[i];
-            temp += result;
-            result = temp;
+            bool oneDigit = true;
+            while(i - 1 >= 0 && isNumber(s[i - 1])){
+                if(oneDigit) {
+                    result = ")" + result;
+                    oneDigit = false;
+                }
+                result = s[i] + result;
+                i--;
+            }
+
+            result = s[i] + result;
+
+            if(!oneDigit)
+                result = "(" + result;
         }
         else{
             if(s[i] == '-' && (i == 0 || !isNumber(s[i - 1]) && s[i - 1] != ')')){
-                temp = "~";
-                temp += result;
-                result = temp;
+                result = "~" + result;
             }
             else {
                 if(s[i] == '(')
@@ -216,9 +233,7 @@ void prefix(string s){
                         break;
                     }
 
-                    temp = st.top();
-                    temp += result;
-                    result = temp;
+                    result = st.top() + result;
 
                     st.pop();
                 }
@@ -234,9 +249,7 @@ void prefix(string s){
     }
 
     while(!st.empty()) {
-        temp = st.top();
-        temp += result;
-        result = temp;
+        result = st.top() + result;
         st.pop();
     }
 
@@ -251,6 +264,16 @@ void prefix(string s){
     for(int i = 0;i < length;i++){
         if(isNumber(result[i])) {
             value.num = result[i] - '0';
+            value.opr = '\0';
+        }
+        else if(result[i] == '('){
+            i++;
+            value.num = 0;
+            while(result[i] != ')'){
+                value.num *= 10;
+                value.num += result[i] - '0';
+                i++;
+            }
             value.opr = '\0';
         }
         else{
@@ -309,7 +332,7 @@ void variable(string s){
 
         sf::VertexArray points(sf::Points);
 
-        float scale = 50.0f; // مقیاس
+        float scale = 50.0f;
         for (float x = -10.0f; x <= 10.0f; x += 0.0001f) {
             float y = solvePostfix(post , x);
             float screenX = 400 + x * scale;
@@ -335,6 +358,4 @@ void variable(string s){
         }
 
     }
-
-
 }
