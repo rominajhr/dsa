@@ -97,23 +97,17 @@ string changeToPostfix(string s){
 
     for(int i = 0;i < length;i++){
         if(isNumber(s[i])) {
-            bool oneDigit = true;
             while(i + 1 < length && isNumber(s[i + 1])){
-                if(oneDigit) {
-                    result += "(";
-                    oneDigit = false;
-                }
                 result += s[i];
                 i++;
             }
             result += s[i];
-            if(!oneDigit)
-                result += ")";
 
             if(!st.empty() && st.top() == '~') {
-                result += '~';
+                result += "~";
                 st.pop();
             }
+            result += " ";
         }
         else{
             if(s[i] == '-' && (i == 0 || !isNumber(s[i - 1]) && s[i - 1] != ')'))
@@ -127,6 +121,7 @@ string changeToPostfix(string s){
                         break;
                     }
                     result += st.top();
+                    result += " ";
                     st.pop();
                 }
 
@@ -143,6 +138,7 @@ string changeToPostfix(string s){
 
     while(!st.empty()) {
         result += st.top();
+        result += " ";
         st.pop();
     }
 
@@ -154,33 +150,37 @@ float solvePostfix(string post , float f){
     stack<float> sta;
     float solution , fl , value;
     for(int i = 0;i < length;i++){
-        if(isNumber(post[i]) || post[i] == '(') {
-            if(post[i] == 'x')
+        if(post[i] == ' ')
+            continue;
+        else if(isNumber(post[i])) {
+            if(post[i] == 'x') {
                 value = f;
-            else if(post[i] == '('){
                 i++;
+            }
+            else{
                 value = 0;
-                while(post[i] != ')'){
-                    value *= 10;
-                    value += post[i] - '0';
+                while(i < length && isNumber(post[i])){
+                    if(post[i] == '~')
+                        value *= -1;
+                    else {
+                        value *= 10;
+                        value += post[i] - '0';
+                    }
                     i++;
                 }
             }
-            else
-                value = post[i] - '0';
+            if(post[i] == '~')
+                value *= -1;
 
             sta.push(value);
         }
         else{
-            if(post[i] == '~')
-                sta.top() *= -1;
-            else{
                 fl = sta.top();
                 sta.pop();
                 solution = solve(post[i] , sta.top() , fl);
                 sta.pop();
                 sta.push(solution);
-            }
+
         }
     }
 
@@ -203,24 +203,17 @@ void prefix(string s){
 
     for(int i = length - 1;i >= 0;i--){
         if(isNumber(s[i])) {
-            bool oneDigit = true;
             while(i - 1 >= 0 && isNumber(s[i - 1])){
-                if(oneDigit) {
-                    result = ")" + result;
-                    oneDigit = false;
-                }
                 result = s[i] + result;
                 i--;
             }
 
             result = s[i] + result;
-
-            if(!oneDigit)
-                result = "(" + result;
+            result = " " + result;
         }
         else{
             if(s[i] == '-' && (i == 0 || !isNumber(s[i - 1]) && s[i - 1] != ')')){
-                result = "~" + result;
+                result = " ~" + result;
             }
             else {
                 if(s[i] == '(')
@@ -234,6 +227,7 @@ void prefix(string s){
                     }
 
                     result = st.top() + result;
+                    result = " " + result;
 
                     st.pop();
                 }
@@ -250,6 +244,7 @@ void prefix(string s){
 
     while(!st.empty()) {
         result = st.top() + result;
+        result = " " + result;
         st.pop();
     }
 
@@ -262,14 +257,11 @@ void prefix(string s){
     stack<NumOrOpr> sta;
     float solution , fl;
     for(int i = 0;i < length;i++){
+        if(result[i] == ' ')
+            continue;
         if(isNumber(result[i])) {
-            value.num = result[i] - '0';
-            value.opr = '\0';
-        }
-        else if(result[i] == '('){
-            i++;
             value.num = 0;
-            while(result[i] != ')'){
+            while(i < length && result[i] != ' '){
                 value.num *= 10;
                 value.num += result[i] - '0';
                 i++;
