@@ -284,12 +284,11 @@ void prefix(string s){
         if(sta.empty()) {
             sta.push(value);
         }
-        else if(sta.top().opr == '~'){
-            value.num *= -1;
-            sta.pop();
-            sta.push(value);
-        }
         else{
+            if(sta.top().opr == '~'){
+                value.num *= -1;
+                sta.pop();
+            }
             while(!sta.empty() && sta.top().opr == '\0' && value.opr == '\0') {
                 fl = sta.top().num;
                 sta.pop();
