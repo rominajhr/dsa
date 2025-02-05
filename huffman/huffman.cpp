@@ -163,7 +163,7 @@ void enCode(string & str , Node * root , int rep[]){
         else if(i < 26)
             str += 'a' + i;
         else
-            str += 'A' + i;
+            str += 'A' + (i - 26);
 
     }
 
